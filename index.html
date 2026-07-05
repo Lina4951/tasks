@@ -1,0 +1,306 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=yes, viewport-fit=cover">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <meta name="apple-mobile-web-app-title" content="Планировщик задач">
+  <meta name="mobile-web-app-capable" content="yes">
+  <meta name="theme-color" content="#FFD700">
+  <title>Планировщик задач</title>
+  <link rel="manifest" href="data:application/json;base64,ewogICJuYW1lIjogItCf0LvQsNC90LjRgNC+0LLRidC40Log0LfQsNC00LDRhyIsCiAgInNob3J0X25hbWUiOiAi0J/Qu9Cw0L3QuNGA0L7QstGJ0LjQuiIsCiAgInN0YXJ0X3VybCI6ICIuIiwKICAiZGlzcGxheSI6ICJzdGFuZGFsb25lIiwKICAiYmFja2dyb3VuZF9jb2xvciI6ICIjRkZENzAwIiwKICAidGhlbWVfY29sb3IiOiAiI0ZGRDcwMCIsCiAgImljb25zIjogWwogICAgewogICAgICAic3JjIjogImRhdGE6aW1hZ2Uvc3ZnK3htbCwlM0NzdmcgeG1sbnM9J2h0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnJyB3aWR0aD0nMTkyJyBoZWlnaHQ9JzE5Micgdmlld0JveD0nMCAwIDE5MiAxOTInJTNFJTNDcmVjdCB3aWR0aD0nMTkyJyBoZWlnaHQ9JzE5Micgcng9JzQwJyBmaWxsPSclMjNGRkQ3MDAnLyUzRSUzQ3RleHQgeD0nOTYnIHk9JzEzNicgZm9udC1zaXplPScxMjAnIGZvbnQtd2VpZ2h0PSc5MDAnIHRleHQtYW5jaG9yPSdtaWRkbGUnIGZpbGw9JyUyMzAwMDAwMCcgZm9udC1mYW1pbHk9J0FyaWFsLCBzYW5zLXNlcmlmJyUzRNCXJTNDL3RleHQlM0UlM0Mvc3ZnJTNFIiwKICAgICAgInNpemVzIjogIjE5MngxOTIiLAogICAgICAidHlwZSI6ICJpbWFnZS9zdmcreG1sIgogICAgfQogIF0KfQ==">
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+    :root {
+      --bg: #FFD700; --bg-dark: #FFC107; --text: #000000; --text-light: #333333; --white: #FFFFFF;
+      --card: rgba(0, 0, 0, 0.04); --card-border: rgba(0, 0, 0, 0.2);
+      --danger: #FF4444; --success: #4CAF50; --blue: #2196F3; --orange: #FF9800; --purple: #9C27B0;
+      --font-size: 15px; --font-size-sm: 13px;
+    }
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+      background: linear-gradient(135deg, var(--bg) 0%, var(--bg-dark) 100%);
+      min-height: 100vh; min-height: -webkit-fill-available;
+      color: var(--text); display: flex; justify-content: center; align-items: center;
+      font-size: var(--font-size);
+    }
+    .app { width: 100%; max-width: 430px; min-height: 100vh; display: flex; flex-direction: column; background: linear-gradient(180deg, var(--bg) 0%, var(--bg-dark) 100%); }
+    .splash { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: linear-gradient(135deg, var(--bg) 0%, var(--bg-dark) 100%); display: flex; align-items: center; justify-content: center; z-index: 9999; transition: opacity 0.5s; }
+    .splash.hidden { opacity: 0; pointer-events: none; }
+    .splash-logo { width: 80px; height: 80px; background: var(--text); border-radius: 22px; display: flex; align-items: center; justify-content: center; font-size: 42px; font-weight: 900; color: var(--bg); animation: pulse 1.5s infinite; }
+    @keyframes pulse { 0%,100%{transform:scale(1)} 50%{transform:scale(1.1)} }
+    .password-screen { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: linear-gradient(135deg, var(--bg) 0%, var(--bg-dark) 100%); display: flex; align-items: center; justify-content: center; z-index: 9998; flex-direction: column; gap: 20px; padding: 30px; }
+    .password-screen.hidden { display: none; }
+    .password-screen .lock-icon { font-size: 60px; }
+    .password-screen h2 { color: var(--text); font-size: 22px; }
+    .password-screen input { width: 100%; max-width: 280px; padding: 14px; border-radius: 16px; border: 2px solid var(--text); background: rgba(255,255,255,0.5); color: var(--text); font-size: 20px; text-align: center; letter-spacing: 6px; outline: none; -webkit-text-security: disc; }
+    .password-screen .btn { padding: 14px 40px; border-radius: 16px; background: var(--text); color: var(--bg); border: none; font-weight: 700; font-size: 18px; cursor: pointer; }
+    .header { padding: 12px 16px 8px; position: sticky; top: 0; z-index: 100; background: rgba(255,215,0,0.95); backdrop-filter: blur(10px); }
+    .header-row { display: flex; align-items: center; justify-content: space-between; }
+    .header .logo { display: flex; align-items: center; gap: 8px; }
+    .header .icon-app { width: 36px; height: 36px; background: var(--text); border-radius: 10px; display: flex; align-items: center; justify-content: center; font-size: 18px; font-weight: 900; color: var(--bg); }
+    .header h1 { font-size: 16px; font-weight: 700; color: var(--text); }
+    .icon-btn { width: 32px; height: 32px; border-radius: 8px; background: rgba(0,0,0,0.1); border: none; font-size: 16px; cursor: pointer; display: flex; align-items: center; justify-content: center; color: var(--text); }
+    .main { flex: 1; overflow-y: auto; padding: 6px 10px 65px; }
+    .bottom-nav { position: fixed; bottom: 0; left: 50%; transform: translateX(-50%); width: 100%; max-width: 430px; background: rgba(255,193,7,0.95); backdrop-filter: blur(20px); display: flex; justify-content: space-around; padding: 4px 4px 12px; border-top: 1.5px solid var(--text); z-index: 150; border-radius: 20px 20px 0 0; }
+    .nav-item { display: flex; flex-direction: column; align-items: center; gap: 1px; cursor: pointer; padding: 3px 6px; border-radius: 8px; border: none; background: none; color: var(--text-light); font-size: 9px; font-weight: 500; transition: all 0.2s; }
+    .nav-item.active { color: var(--text); background: rgba(0,0,0,0.1); }
+    .nav-item .nav-icon { font-size: 18px; }
+    .page { display: none; }
+    .page.active { display: block; animation: fadeIn 0.3s ease; }
+    @keyframes fadeIn { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: translateY(0); } }
+    .reminder-banner { background: rgba(255,68,68,0.15); border: 1.5px solid var(--danger); border-radius: 12px; padding: 8px 12px; margin: 4px 10px; font-size: 12px; display: flex; align-items: center; justify-content: space-between; animation: fadeIn 0.3s ease; }
+    .reminder-close { background: none; border: none; font-size: 16px; cursor: pointer; color: var(--text); }
+    .task-item { display: flex; align-items: center; gap: 8px; padding: 10px; background: var(--card); border: 1px solid var(--card-border); border-radius: 12px; margin-bottom: 4px; transition: all 0.2s; }
+    .task-item.done { opacity: 0.5; }
+    .task-item.done .task-title { text-decoration: line-through; }
+    .task-item.priority-critical { border-left: 4px solid #FF0000; background: rgba(255,0,0,0.05); }
+    .task-item.priority-high { border-left: 4px solid var(--danger); }
+    .task-item.priority-medium { border-left: 4px solid var(--orange); }
+    .task-item.priority-low { border-left: 4px solid var(--success); }
+    .task-checkbox { width: 20px; height: 20px; accent-color: var(--success); flex-shrink: 0; }
+    .task-info { flex: 1; min-width: 0; }
+    .task-title { font-weight: 600; font-size: 14px; }
+    .task-meta { font-size: 10px; color: var(--text-light); margin-top: 2px; display: flex; align-items: center; gap: 4px; flex-wrap: wrap; }
+    .task-category { display: inline-block; padding: 1px 6px; border-radius: 4px; font-size: 9px; margin-right: 4px; }
+    .cat-pu { background: rgba(33,150,243,0.2); color: var(--blue); }
+    .cat-pps { background: rgba(255,152,0,0.2); color: var(--orange); }
+    .cat-general { background: rgba(76,175,80,0.2); color: var(--success); }
+    .cat-admin { background: rgba(156,39,176,0.2); color: var(--purple); }
+    .task-source { display: inline-block; padding: 1px 6px; border-radius: 4px; font-size: 9px; margin-right: 4px; background: rgba(0,0,0,0.06); }
+    .section-title { font-size: 10px; font-weight: 700; color: var(--text); text-transform: uppercase; letter-spacing: 1px; margin: 10px 0 4px; }
+    .btn { padding: 10px; border-radius: 14px; background: var(--text); color: var(--bg); border: none; font-weight: 700; font-size: 14px; cursor: pointer; width: 100%; }
+    .btn-sm { padding: 6px 10px; border-radius: 8px; background: var(--text); color: var(--bg); border: none; font-weight: 600; cursor: pointer; font-size: 11px; }
+    .voice-btn { width: 70px; height: 70px; border-radius: 50%; background: var(--danger); border: none; font-size: 30px; cursor: pointer; color: white; display: flex; align-items: center; justify-content: center; margin: 10px auto; box-shadow: 0 4px 20px rgba(255,68,68,0.3); }
+    .voice-btn.listening { animation: pulse 1.2s infinite; }
+    .toast { position: fixed; bottom: 70px; left: 50%; transform: translateX(-50%); background: var(--text); color: var(--bg); padding: 6px 14px; border-radius: 14px; font-size: 11px; z-index: 500; animation: fadeIn 0.3s ease; }
+    .hidden { display: none !important; }
+    .mt-1 { margin-top: 4px; }
+    .text-center { text-align: center; }
+    .text-light { color: var(--text-light); font-size: 11px; }
+    input, select { padding: 8px 10px; border-radius: 10px; border: 1.5px solid var(--text); background: rgba(255,255,255,0.5); color: var(--text); font-size: 13px; width: 100%; margin-bottom: 6px; }
+    .deadline-warning { color: var(--danger); font-weight: 700; }
+    .deadline-ok { color: var(--success); }
+    .msg-btn { font-size: 8px; padding: 2px 5px; border-radius: 3px; border: none; background: rgba(0,0,0,0.08); color: var(--text); cursor: pointer; }
+  </style>
+</head>
+<body>
+
+<div class="splash" id="splash"><div class="splash-logo">З</div></div>
+<div class="password-screen hidden" id="passwordScreen">
+  <div class="lock-icon">🔐</div>
+  <h2>Планировщик задач</h2>
+  <input type="password" id="passwordInput" placeholder="Введите пароль" maxlength="20">
+  <button class="btn" id="passwordSubmit" style="max-width:280px;">Войти</button>
+  <div class="text-light" style="font-size:11px;">Стандартный пароль: 1234</div>
+</div>
+<div class="toast hidden" id="toast"></div>
+
+<div class="app">
+  <div class="header">
+    <div class="header-row">
+      <div class="logo"><div class="icon-app">З</div><h1>Планировщик задач</h1></div>
+      <div class="header-actions">
+        <button class="icon-btn" id="themeToggle">🌓</button>
+        <button class="icon-btn" id="lockBtn">🔒</button>
+      </div>
+    </div>
+  </div>
+  <div id="reminderBannerContainer"></div>
+
+  <div class="main" id="mainContent">
+    <!-- ГЛАВНАЯ -->
+    <div class="page active" id="page-home">
+      <div class="section-title">🔴 СРОЧНО-СРОЧНО!</div>
+      <div id="criticalTasks"></div>
+      <div class="section-title">🟠 Срочно</div>
+      <div id="highTasks"></div>
+      <div class="section-title">🟡 Важно</div>
+      <div id="mediumTasks"></div>
+      <div class="section-title">🟢 Обычно</div>
+      <div id="lowTasks"></div>
+      <div class="section-title">✅ Выполненные</div>
+      <div id="doneTasks"></div>
+    </div>
+
+    <!-- ДОБАВИТЬ -->
+    <div class="page" id="page-add">
+      <div class="section-title">🎤 Голосовой ввод</div>
+      <button class="voice-btn" id="voiceBtn">🎤</button>
+      <div class="text-light text-center" id="voiceResult">Нажмите и скажите задачу</div>
+      <div class="section-title">📝 Или вручную</div>
+      <input type="text" id="taskTitle" placeholder="Название задачи">
+      <select id="taskSource">
+        <option value="boss">👔 Начальник</option>
+        <option value="deputy">👔 Заместитель</option>
+        <option value="meeting" selected>📋 Совещание</option>
+        <option value="self">💡 Себе</option>
+      </select>
+      <select id="taskCategory">
+        <option value="pu">📊 ПУ (персучёт)</option>
+        <option value="pps">💰 ППС</option>
+        <option value="general">📋 Общие вопросы</option>
+        <option value="admin">🔧 Администратор</option>
+      </select>
+      <select id="taskPriority">
+        <option value="critical">🔴 Срочно-срочно!</option>
+        <option value="high">🟠 Срочно</option>
+        <option value="medium" selected>🟡 Важно</option>
+        <option value="low">🟢 Обычно</option>
+      </select>
+      <input type="datetime-local" id="taskDeadline">
+      <button class="btn mt-1" onclick="addTask()">➕ Добавить задачу</button>
+    </div>
+  </div>
+
+  <div class="bottom-nav">
+    <button class="nav-item active" data-page="home"><span class="nav-icon">📋</span>Задачи</button>
+    <button class="nav-item" data-page="add"><span class="nav-icon">➕</span>Добавить</button>
+  </div>
+</div>
+
+<script>
+if ('serviceWorker' in navigator) { window.addEventListener('load', function() { navigator.serviceWorker.register("data:application/javascript," + encodeURIComponent("self.addEventListener('install',e=>{e.waitUntil(caches.open('tasks-v3').then(c=>c.addAll(['/','/index.html'])));self.skipWaiting();});" + "self.addEventListener('fetch',e=>{e.respondWith(caches.match(e.request).then(r=>r||fetch(e.request).then(res=>{let rc=res.clone();caches.open('tasks-v3').then(c=>c.put(e.request,rc));return res;}).catch(()=>caches.match('/index.html'))));});")).catch(()=>{}); }); }
+</script>
+
+<script>
+  // Пароль
+  const PASSWORD_KEY = 'tasks_v3_pwd'; let appPassword = localStorage.getItem(PASSWORD_KEY) || '1234';
+  let isUnlocked = !localStorage.getItem(PASSWORD_KEY);
+  function checkPassword() { if (document.getElementById('passwordInput').value.trim() === appPassword) { isUnlocked = true; document.getElementById('passwordScreen').classList.add('hidden'); } }
+  function lockApp() { isUnlocked = false; document.getElementById('passwordScreen').classList.remove('hidden'); }
+  document.getElementById('passwordSubmit').addEventListener('click', checkPassword);
+  document.getElementById('passwordInput').addEventListener('keydown', e => { if (e.key === 'Enter') checkPassword(); });
+  document.getElementById('lockBtn').addEventListener('click', lockApp);
+  setTimeout(() => { document.getElementById('splash').classList.add('hidden'); document.getElementById('passwordScreen').classList.remove('hidden'); }, 1500);
+
+  // Данные
+  const STORAGE_KEY = 'tasks_v3_data';
+  function loadData() { const r = localStorage.getItem(STORAGE_KEY); return r ? JSON.parse(r) : { tasks: [] }; }
+  function saveData(d) { localStorage.setItem(STORAGE_KEY, JSON.stringify(d)); }
+  let appData = loadData();
+
+  function showToast(m) { const t = document.getElementById('toast'); t.textContent = m; t.classList.remove('hidden'); setTimeout(() => t.classList.add('hidden'), 1500); }
+  function navigateTo(p) {
+    document.querySelectorAll('.page').forEach(x => x.classList.remove('active')); document.getElementById('page-' + p).classList.add('active');
+    document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
+    const nav = document.querySelector('[data-page="' + p + '"]'); if (nav) nav.classList.add('active');
+    if (p === 'home') renderTasks();
+  }
+  document.querySelectorAll('.nav-item').forEach(b => b.addEventListener('click', () => navigateTo(b.dataset.page)));
+
+  // Тема
+  let isDark = false;
+  document.getElementById('themeToggle').addEventListener('click', () => { isDark = !isDark; const r = document.documentElement.style; if (isDark) { r.setProperty('--bg','#333333'); r.setProperty('--bg-dark','#1a1a1a'); r.setProperty('--text','#FFD700'); r.setProperty('--card','rgba(255,215,0,0.08)'); r.setProperty('--card-border','rgba(255,215,0,0.3)'); } else { r.setProperty('--bg','#FFD700'); r.setProperty('--bg-dark','#FFC107'); r.setProperty('--text','#000000'); r.setProperty('--card','rgba(0,0,0,0.04)'); r.setProperty('--card-border','rgba(0,0,0,0.2)'); } });
+
+  function addTask() {
+    const title = document.getElementById('taskTitle').value.trim();
+    const category = document.getElementById('taskCategory').value;
+    const priority = document.getElementById('taskPriority').value;
+    const source = document.getElementById('taskSource').value;
+    const deadline = document.getElementById('taskDeadline').value;
+    if (!title) { showToast('Введите название'); return; }
+    appData.tasks.push({ title, category, priority, source, deadline: deadline || null, done: false, createdAt: new Date().toISOString(), id: Date.now() });
+    saveData(appData);
+    document.getElementById('taskTitle').value = '';
+    showToast('✅ Задача добавлена!');
+    navigateTo('home');
+  }
+
+  function toggleTask(id) { const t = appData.tasks.find(t => t.id === id); if (t) { t.done = !t.done; saveData(appData); renderTasks(); } }
+  function deleteTask(id) { appData.tasks = appData.tasks.filter(t => t.id !== id); saveData(appData); renderTasks(); showToast('🗑️ Удалена'); }
+  function changePriority(id, np) { const t = appData.tasks.find(t => t.id === id); if (t) { t.priority = np; saveData(appData); renderTasks(); showToast('🔄 Приоритет изменён!'); } }
+
+  function getDeadlineInfo(deadline) {
+    if (!deadline) return { text: '', cls: '' };
+    const now = new Date(); const dl = new Date(deadline);
+    const diff = Math.ceil((dl - now) / (1000 * 60 * 60 * 24));
+    if (diff < 0) return { text: 'Просрочено!', cls: 'deadline-warning' };
+    if (diff === 0) return { text: 'Сегодня!', cls: 'deadline-warning' };
+    if (diff === 1) return { text: 'Завтра!', cls: 'deadline-warning' };
+    if (diff <= 3) return { text: `${diff} дня`, cls: 'deadline-warning' };
+    return { text: `${diff} дней`, cls: 'deadline-ok' };
+  }
+
+  // Сортировка: сначала по источнику (начальник > зам > совещание > себе), потом по приоритету
+  const sourceOrder = { boss: 0, deputy: 1, meeting: 2, self: 3 };
+  const priorityOrder = { critical: 0, high: 1, medium: 2, low: 3 };
+
+  function renderTasks() {
+    const active = appData.tasks.filter(t => !t.done).sort((a,b) => {
+      if (sourceOrder[a.source] !== sourceOrder[b.source]) return sourceOrder[a.source] - sourceOrder[b.source];
+      if (priorityOrder[a.priority] !== priorityOrder[b.priority]) return priorityOrder[a.priority] - priorityOrder[b.priority];
+      return (a.deadline||'') > (b.deadline||'') ? 1 : -1;
+    });
+    const done = appData.tasks.filter(t => t.done);
+
+    const catLabels = { pu: 'ПУ', pps: 'ППС', general: 'Общие', admin: 'Админ' };
+    const catClasses = { pu: 'cat-pu', pps: 'cat-pps', general: 'cat-general', admin: 'cat-admin' };
+    const sourceLabels = { boss: '👔 Начальник', deputy: '👔 Зам', meeting: '📋 Совещание', self: '💡 Себе' };
+
+    function renderList(tasks, containerId) {
+      const container = document.getElementById(containerId);
+      container.innerHTML = tasks.length === 0 ? '<p class="text-light">Нет задач</p>' : tasks.map(t => {
+        const dl = getDeadlineInfo(t.deadline);
+        return `<div class="task-item priority-${t.priority} ${t.done ? 'done' : ''}">
+          <input type="checkbox" class="task-checkbox" ${t.done ? 'checked' : ''} onchange="toggleTask(${t.id})">
+          <div class="task-info">
+            <div class="task-title">${t.title}</div>
+            <div class="task-meta">
+              <span class="task-source">${sourceLabels[t.source]}</span>
+              <span class="task-category ${catClasses[t.category]}">${catLabels[t.category]}</span>
+              ${dl.text ? `<span class="${dl.cls}">⏰ ${dl.text}</span>` : ''}
+              ${t.done ? '' : `<button class="msg-btn" onclick="changePriority(${t.id},'critical')">🔴</button><button class="msg-btn" onclick="changePriority(${t.id},'high')">🟠</button><button class="msg-btn" onclick="changePriority(${t.id},'medium')">🟡</button><button class="msg-btn" onclick="changePriority(${t.id},'low')">🟢</button>`}
+            </div>
+          </div>
+          <button class="msg-btn" onclick="deleteTask(${t.id})" style="font-size:14px;">✕</button>
+        </div>`;
+      }).join('');
+    }
+
+    renderList(active.filter(t => t.priority === 'critical'), 'criticalTasks');
+    renderList(active.filter(t => t.priority === 'high'), 'highTasks');
+    renderList(active.filter(t => t.priority === 'medium'), 'mediumTasks');
+    renderList(active.filter(t => t.priority === 'low'), 'lowTasks');
+    renderList(done, 'doneTasks');
+
+    const urgent = active.filter(t => t.deadline && getDeadlineInfo(t.deadline).cls === 'deadline-warning');
+    const banner = document.getElementById('reminderBannerContainer');
+    banner.innerHTML = urgent.length > 0 ? urgent.slice(0,3).map(t => `<div class="reminder-banner">🔔 ${t.title} — ${getDeadlineInfo(t.deadline).text} <button class="reminder-close" onclick="this.parentElement.remove()">✕</button></div>`).join('') : '';
+  }
+
+  // ГОЛОС
+  const vb = document.getElementById('voiceBtn'); let rec = null, listening = false;
+  if ('webkitSpeechRecognition' in window || 'SpeechRecognition' in window) {
+    const SR = window.SpeechRecognition || window.webkitSpeechRecognition; rec = new SR(); rec.lang = 'ru-RU'; rec.interimResults = false;
+    rec.onresult = (e) => {
+      const text = e.results[0][0].transcript; document.getElementById('voiceResult').textContent = '«' + text + '»';
+      vb.classList.remove('listening'); listening = false;
+      document.getElementById('taskTitle').value = text;
+      const t = text.toLowerCase();
+      if (t.includes('ппс')) document.getElementById('taskCategory').value = 'pps';
+      else if (t.includes('пу')||t.includes('персуч')) document.getElementById('taskCategory').value = 'pu';
+      else if (t.includes('админ')||t.includes('заявк')) document.getElementById('taskCategory').value = 'admin';
+      else document.getElementById('taskCategory').value = 'general';
+      if (t.includes('начальник')) document.getElementById('taskSource').value = 'boss';
+      else if (t.includes('зам')||t.includes('заместитель')) document.getElementById('taskSource').value = 'deputy';
+      else if (t.includes('себе')||t.includes('мне')) document.getElementById('taskSource').value = 'self';
+      else document.getElementById('taskSource').value = 'meeting';
+      if (t.includes('срочно срочно')||t.includes('критич')) document.getElementById('taskPriority').value = 'critical';
+      else if (t.includes('срочно')) document.getElementById('taskPriority').value = 'high';
+      else if (t.includes('важно')) document.getElementById('taskPriority').value = 'medium';
+      else document.getElementById('taskPriority').value = 'medium';
+      addTask();
+    };
+    rec.onerror = () => { vb.classList.remove('listening'); listening = false; };
+    rec.onend = () => { vb.classList.remove('listening'); listening = false; };
+  }
+  vb.addEventListener('click', () => { if (!rec) return; if (listening) { rec.stop(); vb.classList.remove('listening'); } else { rec.start(); vb.classList.add('listening'); document.getElementById('voiceResult').textContent = '🎤 Слушаю...'; } listening = !listening; });
+
+  function init() { renderTasks(); }
+  init();
+  console.log('✅ Планировщик задач v3 — 5 приоритетов + источники!');
+</script>
+</body>
+</html>
