@@ -112,9 +112,9 @@
 
   <div class="main" id="mainContent">
     <div class="page active" id="page-home">
-      <div class="install-banner hidden" id="installBanner">
+      <div class="install-banner" id="installBanner">
         <span style="font-size:11px;">📱 Установить как приложение</span>
-        <button class="install-btn" id="installBtn">Установить</button>
+        <button class="install-btn" id="installBtn">Как?</button>
       </div>
       <div class="section-title">🔴 СРОЧНО-СРОЧНО!</div><div id="criticalTasks"></div>
       <div class="section-title">🟠 Срочно</div><div id="highTasks"></div>
@@ -144,7 +144,7 @@
 <script>
   if ('serviceWorker' in navigator) {
     navigator.serviceWorker.register("data:application/javascript," + encodeURIComponent(
-      "const C='tasks-v5';self.addEventListener('install',e=>{e.waitUntil(caches.open(C).then(c=>c.addAll(['/','/index.html'])));self.skipWaiting();});" +
+      "const C='tasks-v6';self.addEventListener('install',e=>{e.waitUntil(caches.open(C).then(c=>c.addAll(['/','/index.html'])));self.skipWaiting();});" +
       "self.addEventListener('activate',e=>{e.waitUntil(caches.keys().then(keys=>Promise.all(keys.filter(k=>k!==C).map(k=>caches.delete(k)))));clients.claim();});" +
       "self.addEventListener('fetch',e=>{e.respondWith(caches.match(e.request).then(r=>r||fetch(e.request).then(res=>{let rc=res.clone();caches.open(C).then(c=>c.put(e.request,rc));return res;})));});"
     ));
@@ -152,13 +152,12 @@
 </script>
 
 <script>
-  // PWA Install Banner
-  let deferredPrompt = null;
-  window.addEventListener('beforeinstallprompt', (e) => { e.preventDefault(); deferredPrompt = e; document.getElementById('installBanner').classList.remove('hidden'); });
-  document.getElementById('installBtn').addEventListener('click', async () => { if (deferredPrompt) { deferredPrompt.prompt(); const r = await deferredPrompt.userChoice; if (r.outcome === 'accepted') document.getElementById('installBanner').classList.add('hidden'); deferredPrompt = null; } });
-  window.addEventListener('appinstalled', () => { document.getElementById('installBanner').classList.add('hidden'); });
+  // Установочный баннер — всегда виден, при нажатии показывает инструкцию
+  document.getElementById('installBtn').addEventListener('click', () => {
+    alert('📱 Чтобы установить приложение:\n\n1. Нажмите ⋮ (три точки) в браузере\n2. Выберите "Добавить на главный экран"\n3. Или "Установить приложение"\n\nИконка появится на рабочем столе!');
+  });
 
-  const PASSWORD_KEY = 'tasks_v5_pwd'; let appPassword = localStorage.getItem(PASSWORD_KEY) || '1234';
+  const PASSWORD_KEY = 'tasks_v6_pwd'; let appPassword = localStorage.getItem(PASSWORD_KEY) || '1234';
   let isUnlocked = !localStorage.getItem(PASSWORD_KEY);
   function checkPassword() { if (document.getElementById('passwordInput').value.trim() === appPassword) { isUnlocked = true; document.getElementById('passwordScreen').classList.add('hidden'); } }
   function lockApp() { isUnlocked = false; document.getElementById('passwordScreen').classList.remove('hidden'); }
@@ -167,7 +166,7 @@
   document.getElementById('lockBtn').addEventListener('click', lockApp);
   setTimeout(() => { document.getElementById('splash').classList.add('hidden'); document.getElementById('passwordScreen').classList.remove('hidden'); }, 1200);
 
-  const STORAGE_KEY = 'tasks_v5_data';
+  const STORAGE_KEY = 'tasks_v6_data';
   function loadData() { const r = localStorage.getItem(STORAGE_KEY); return r ? JSON.parse(r) : { tasks: [] }; }
   function saveData(d) { localStorage.setItem(STORAGE_KEY, JSON.stringify(d)); }
   let appData = loadData();
@@ -277,7 +276,7 @@
 
   function init() { renderTasks(); }
   init();
-  console.log('✅ Планировщик задач v5 — с установочным баннером!');
+  console.log('✅ Планировщик задач v6 — баннер всегда виден!');
 </script>
 </body>
 </html>
