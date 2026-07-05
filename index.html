@@ -49,6 +49,8 @@
     .page { display: none; }
     .page.active { display: block; animation: fadeIn 0.2s ease; }
     @keyframes fadeIn { from { opacity: 0; transform: translateY(5px); } to { opacity: 1; transform: translateY(0); } }
+    .install-banner { background: rgba(0,0,0,0.08); border: 1.5px solid var(--text); border-radius: 12px; padding: 8px 12px; margin-bottom: 8px; display: flex; align-items: center; justify-content: space-between; }
+    .install-btn { background: var(--text); color: var(--bg); border: none; padding: 6px 12px; border-radius: 8px; font-weight: 700; font-size: 11px; cursor: pointer; }
     .reminder-banner { background: rgba(255,68,68,0.15); border: 1px solid var(--danger); border-radius: 10px; padding: 6px 10px; margin: 2px 8px; font-size: 10px; display: flex; align-items: center; justify-content: space-between; }
     .reminder-close { background: none; border: none; font-size: 14px; cursor: pointer; color: var(--text); }
     .task-item { display: flex; align-items: center; gap: 6px; padding: 8px; background: var(--card); border: 1px solid var(--card-border); border-radius: 10px; margin-bottom: 3px; transition: all 0.15s; }
@@ -110,6 +112,10 @@
 
   <div class="main" id="mainContent">
     <div class="page active" id="page-home">
+      <div class="install-banner hidden" id="installBanner">
+        <span style="font-size:11px;">📱 Установить как приложение</span>
+        <button class="install-btn" id="installBtn">Установить</button>
+      </div>
       <div class="section-title">🔴 СРОЧНО-СРОЧНО!</div><div id="criticalTasks"></div>
       <div class="section-title">🟠 Срочно</div><div id="highTasks"></div>
       <div class="section-title">🟡 Важно</div><div id="mediumTasks"></div>
@@ -138,7 +144,7 @@
 <script>
   if ('serviceWorker' in navigator) {
     navigator.serviceWorker.register("data:application/javascript," + encodeURIComponent(
-      "const C='tasks-v4';self.addEventListener('install',e=>{e.waitUntil(caches.open(C).then(c=>c.addAll(['/','/index.html'])));self.skipWaiting();});" +
+      "const C='tasks-v5';self.addEventListener('install',e=>{e.waitUntil(caches.open(C).then(c=>c.addAll(['/','/index.html'])));self.skipWaiting();});" +
       "self.addEventListener('activate',e=>{e.waitUntil(caches.keys().then(keys=>Promise.all(keys.filter(k=>k!==C).map(k=>caches.delete(k)))));clients.claim();});" +
       "self.addEventListener('fetch',e=>{e.respondWith(caches.match(e.request).then(r=>r||fetch(e.request).then(res=>{let rc=res.clone();caches.open(C).then(c=>c.put(e.request,rc));return res;})));});"
     ));
@@ -146,7 +152,13 @@
 </script>
 
 <script>
-  const PASSWORD_KEY = 'tasks_v4_pwd'; let appPassword = localStorage.getItem(PASSWORD_KEY) || '1234';
+  // PWA Install Banner
+  let deferredPrompt = null;
+  window.addEventListener('beforeinstallprompt', (e) => { e.preventDefault(); deferredPrompt = e; document.getElementById('installBanner').classList.remove('hidden'); });
+  document.getElementById('installBtn').addEventListener('click', async () => { if (deferredPrompt) { deferredPrompt.prompt(); const r = await deferredPrompt.userChoice; if (r.outcome === 'accepted') document.getElementById('installBanner').classList.add('hidden'); deferredPrompt = null; } });
+  window.addEventListener('appinstalled', () => { document.getElementById('installBanner').classList.add('hidden'); });
+
+  const PASSWORD_KEY = 'tasks_v5_pwd'; let appPassword = localStorage.getItem(PASSWORD_KEY) || '1234';
   let isUnlocked = !localStorage.getItem(PASSWORD_KEY);
   function checkPassword() { if (document.getElementById('passwordInput').value.trim() === appPassword) { isUnlocked = true; document.getElementById('passwordScreen').classList.add('hidden'); } }
   function lockApp() { isUnlocked = false; document.getElementById('passwordScreen').classList.remove('hidden'); }
@@ -155,7 +167,7 @@
   document.getElementById('lockBtn').addEventListener('click', lockApp);
   setTimeout(() => { document.getElementById('splash').classList.add('hidden'); document.getElementById('passwordScreen').classList.remove('hidden'); }, 1200);
 
-  const STORAGE_KEY = 'tasks_v4_data';
+  const STORAGE_KEY = 'tasks_v5_data';
   function loadData() { const r = localStorage.getItem(STORAGE_KEY); return r ? JSON.parse(r) : { tasks: [] }; }
   function saveData(d) { localStorage.setItem(STORAGE_KEY, JSON.stringify(d)); }
   let appData = loadData();
@@ -265,7 +277,7 @@
 
   function init() { renderTasks(); }
   init();
-  console.log('✅ Планировщик задач v4 — быстрая загрузка!');
+  console.log('✅ Планировщик задач v5 — с установочным баннером!');
 </script>
 </body>
 </html>
